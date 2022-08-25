@@ -7,6 +7,7 @@ import "./utils/ContractUtil.sol";
 // todo need to handle safe math and transfer
 
 contract ERC1155Contract is ERC1155, ContractUtil {
+    event ActionNotifier(address observer);
 
     constructor() ERC1155(initialURI) {
     }
@@ -38,6 +39,7 @@ contract ERC1155Contract is ERC1155, ContractUtil {
             revert InSufficientMatic();
         }
         forgeOrMintTokens(tokenId, amount);
+        emit ActionNotifier(msg.sender);
     }
 
     function startBurningToken(uint256 tokenId, uint256 amount) external payable {
@@ -51,9 +53,11 @@ contract ERC1155Contract is ERC1155, ContractUtil {
         authorizeAddress(msg.sender);
         // burn tokens
         _burn(msg.sender, tokenId, amount);
+        emit ActionNotifier(msg.sender);
     }
 
     function startTransferringToken(uint256 fromTokenId, uint256 toTokenId, uint256 amount) external payable {
+        require(fromTokenId != toTokenId, "Invalid Transfer");
         // check if the tokens are among 0,1,2,3,4,5,6
         checkIfTokenIsValid(fromTokenId);
         checkIfTokenIsValid(toTokenId);
@@ -61,13 +65,14 @@ contract ERC1155Contract is ERC1155, ContractUtil {
         isAmountZero(amount);
         // check availabilities
         isEligibleToTransfer(fromTokenId, amount, true);
-        isEligibleToTransfer(fromTokenId, amount, false);
+        isEligibleToTransfer(toTokenId, amount, false);
 
         // restrict null address and contract Addresses
         authorizeAddress(msg.sender);
         // burn tokens
         _burn(msg.sender, fromTokenId, amount);
         _mint(msg.sender, toTokenId, amount, "");
+        emit ActionNotifier(msg.sender);
     }
 
 
@@ -119,10 +124,10 @@ contract ERC1155Contract is ERC1155, ContractUtil {
 
     function isEligibleToBurn(uint256 tokenId, uint256 amount) internal returns (bool isEligible){
         isEligible = false;
-        require(tokenId == 0, "Can not burn this token");
-        require(tokenId == 1, "Can not burn this token");
-        require(tokenId == 2, "Can not burn this token");
-       if ((tokenId == 3 || tokenId == 4 || tokenId == 5 || tokenId == 6) && amount > 0) {
+        require(tokenId != 0, "Can not burn this token");
+        require(tokenId != 1, "Can not burn this token");
+        require(tokenId != 2, "Can not burn this token");
+        if ((tokenId == 3 || tokenId == 4 || tokenId == 5 || tokenId == 6) && amount > 0) {
             require(balanceOf(msg.sender, tokenId) >= amount, "Insufficient Tokens to burn");
             isEligible = true;
         }
@@ -130,16 +135,33 @@ contract ERC1155Contract is ERC1155, ContractUtil {
     }
 
     function isEligibleToTransfer(uint256 tokenId, uint256 amount, bool isFromToken) internal returns (bool isEligible){
+        // transfers can only be one to one 
         isEligible = false;
+        if (!isFromToken) {
+            require(tokenId != 3, "Can not Trade For token 3");
+            require(tokenId != 4, "Can not Trade For token 4");
+            require(tokenId != 5, "Can not Trade For token 5");
+            require(tokenId != 6, "Can not Trade For token 6");
+        }
         if ((tokenId == 0 || tokenId == 1 || tokenId == 2 || tokenId == 3 || tokenId == 4 || tokenId == 5 || tokenId == 6) && amount > 0 && isFromToken) {
             require(balanceOf(msg.sender, tokenId) >= amount, "Insufficient Tokens to Transfer");
             isEligible = true;
-        } else if ((tokenId == 0 || tokenId == 1 || tokenId == 2 ) && amount > 0 && !isFromToken) {
+        } else if ((tokenId == 0 || tokenId == 1 || tokenId == 2) && !isFromToken) {
             isEligible = true;
-        } else if ((tokenId == 3 || tokenId == 4 || tokenId == 5 || tokenId == 6) && amount > 0 && !isFromToken) {
-            require(balanceOf(msg.sender, tokenId) >= amount, "Selected To Token can not be transferred");
         }
 
+    }
+
+    function getAllTokenBalances(address userAddress) external view returns (uint[] memory){
+        uint[] memory userBalances = new uint[](7);
+        userBalances[0] = balanceOf(userAddress, 0);
+        userBalances[1] = balanceOf(userAddress, 1);
+        userBalances[2] = balanceOf(userAddress, 2);
+        userBalances[3] = balanceOf(userAddress, 3);
+        userBalances[4] = balanceOf(userAddress, 4);
+        userBalances[5] = balanceOf(userAddress, 5);
+        userBalances[6] = balanceOf(userAddress, 6);
+        return userBalances;
     }
 
 }
