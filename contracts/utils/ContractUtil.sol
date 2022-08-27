@@ -1,27 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
+// General Error Validations
     error TokenDoesNotExist();
-    error InSufficientMatic();
     error InvalidWalletAddress();
-    error SelectedTokenCanNotBeForged();
     error TokenAmountCanNotBeZero();
+    error InsufficientTokens();
+
+// Minting and Forging Error Validations
+    error InSufficientMatic();
+
+// Trade errors
+    error TokenCanNotBeTradedForEqualTokenId();
+    error CanNotReceiveThisTokenByTrading();
+//Burn Error Validations
+    error CanNotBurnThisToken();
 
 contract ContractUtil {
-    string internal imageIPFSUri = "ipfs://bafybeia4ey6ak5nodtqqtnov6mhwsy3b4vbsmihpjunmlzxugb7ute63j4";
-    string internal jsonIPFSUri = "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq";
     string internal initialURI = "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/0";
-    uint256 internal oneMaticWithDecimals = 1 * 10 ** 18;
-
-
     mapping(uint256 => string) internal tokenMap;
     mapping(uint256 => bool) internal tokenValidationMap;
     mapping(uint256 => uint256[]) internal tokenForgeEligibilityMap;
+    // token fees will be stored in ^14 decimal place
+    mapping(uint256 => uint256[]) internal tokenFees;
 
     constructor(){
         setEligibleTokenURI();
         setEligibilityForMint();
         setEligibleTokenIds();
+        setInitialFees();
     }
 
     function checkIfTokenIsValid(uint256 tokenId) internal view returns (string memory isValid){
@@ -29,21 +36,20 @@ contract ContractUtil {
     }
 
     function getMiningPriceForToken(uint256 tokenId) internal pure returns (uint256 price) {
-        if (tokenId == 0) {
-            price = 0;
-        } else if (tokenId == 1) {
-            price = 0;
-        } else if (tokenId == 2) {
-            price = 0;
-        } else if (tokenId == 3) {
-            price = 6 * 10 ** 15;
-        } else if (tokenId == 4) {
-            price = 8 * 10 ** 15;
-        } else if (tokenId == 5) {
-            price = 8 * 10 ** 15;
-        } else {
-            price = 1 * 10 ** 16;
+        if (tokenFees[tokenId]) {
+            return tokenFees[tokenId];
         }
+        revert TokenDoesNotExist();
+    }
+
+    function setInitialFees(uint256 tokenId, uint256 fee) internal {
+        tokenFees[0] = 0;
+        tokenFees[1] = 0;
+        tokenFees[2] = 0;
+        tokenFees[3] = 1 * 10 ** 14;
+        tokenFees[4] = 1 * 10 ** 14;
+        tokenFees[5] = 1 * 10 ** 14;
+        tokenFees[6] = 1 * 10 ** 14;
     }
 
     function authorizeAddress(address sender) internal view {
@@ -59,7 +65,6 @@ contract ContractUtil {
         tokenForgeEligibilityMap[6] = [0, 1, 2];
     }
 
-    
 
     function setEligibleTokenURI() private {
         tokenMap[0] = "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/0";
@@ -84,6 +89,12 @@ contract ContractUtil {
     function isAmountZero(uint256 amount) internal pure {
         if (amount == 0) {
             revert TokenAmountCanNotBeZero();
+        }
+    }
+
+    function checkIfTransferTokenAreSame(uint256 from, uint256 to){
+        if (from == to) {
+            revert TokenCanNotBeTradedForEqualTokenId();
         }
     }
 
