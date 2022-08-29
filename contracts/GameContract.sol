@@ -2,13 +2,13 @@
 pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "./BaseContract.sol";
+import "./BaseGameControllerContract.sol";
 
 
-contract GameContract is BaseContract {
+contract GameContract is BaseGameControllerContract {
 
 
-    constructor(ERC1155BaseContract initialContract) BaseContract(initialContract) {
+    constructor(ERC1155BaseContract initialContract) BaseGameControllerContract(initialContract) {
     }
     /**
         tokenId - token Id user would like to mint/forge

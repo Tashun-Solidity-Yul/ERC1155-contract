@@ -4,7 +4,7 @@ pragma solidity 0.8.13;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "./utils/ContractUtil.sol";
 
-contract BaseContract is ContractUtil {
+contract BaseGameControllerContract is ContractUtil {
     event ActionNotifier(address observer);
 
     constructor(ERC1155BaseContract initBaseContract)ContractUtil(initBaseContract) {
