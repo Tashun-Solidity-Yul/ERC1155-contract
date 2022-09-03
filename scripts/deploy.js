@@ -7,19 +7,19 @@
 const hre = require('hardhat');
 
 async function main() {
-	// const baseContractFactory = await hre.ethers.getContractFactory('ERC1155BaseContract');
-	// const baseContract = await baseContractFactory.deploy();
-	//
-	// await baseContract.deployed();
-	const baseContract = await hre.ethers.getContractAt('ERC1155BaseContract', "0xb702A91f95C045e1850AAF4B4bd2a8F1B163b359");
-	const gameContract = await hre.ethers.getContractAt('ERC1155BaseContract', "0x41d3cc91c36bb3a57387efc7a5a21c50952d9ffb");
+	const baseContractFactory = await hre.ethers.getContractFactory('ERC1155BaseContract');
+	const baseContract = await baseContractFactory.deploy();
+
+	await baseContract.deployed();
+	// const baseContract = await hre.ethers.getContractAt('ERC1155BaseContract', "0xb702A91f95C045e1850AAF4B4bd2a8F1B163b359");
+	// const gameContract = await hre.ethers.getContractAt('ERC1155BaseContract', "0x41d3cc91c36bb3a57387efc7a5a21c50952d9ffb");
 	// console.log(baseContract.address);
-	// const gameContractFactory = await hre.ethers.getContractFactory('GameContract');
-	//
-	// const gas =gameContractFactory.estimateGas.deploy(baseContract.address);
-	// console.log(gas)
-	// const gameContract = await gameContractFactory.deploy(baseContract.address, {gasLimit: 2100000});
-	// await gameContract.deployed();
+	const gameContractFactory = await hre.ethers.getContractFactory('GameContract');
+
+	const gas =gameContractFactory.estimateGas.deploy(baseContract.address);
+	console.log(gas)
+	const gameContract = await gameContractFactory.deploy(baseContract.address, {gasLimit: 2100000});
+	await gameContract.deployed();
 	const adminRole = await baseContract.ADMIN_ROLE();
 
 	await baseContract.grantRole(adminRole, gameContract.address);
