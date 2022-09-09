@@ -30,8 +30,8 @@ describe('GameContractMint startMintingToken function tests', () => {
 		expect(bool).to.be.equal(false);
 	});
 	it('Set invalid token, by overriding', async () => {
-		await baseContract.connect(accounts[user1]).setNewToken(0,"Test");
-		await expect(baseContract.connect(accounts[user1]).setNewToken(0,"Test1")).to.be.revertedWithCustomError(baseContract,'InvalidToken')
+		await baseContract.connect(accounts[user1]).createNewToken(0,"Test");
+		await expect(baseContract.connect(accounts[user1]).createNewToken(0,"Test1")).to.be.revertedWithCustomError(baseContract,'InvalidToken')
 	});
 
 });

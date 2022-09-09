@@ -28,7 +28,7 @@ contract ERC1155BaseContract is ERC1155URIStorage, AccessControl {
             super.supportsInterface(interfaceId);
     }
 
-    function setNewToken(uint256 tokenId, string memory tokenURI)
+    function createNewToken(uint256 tokenId, string memory tokenURI)
         external
         onlyRole(ADMIN_ROLE)
     {
