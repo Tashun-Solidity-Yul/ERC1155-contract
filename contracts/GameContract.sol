@@ -3,6 +3,7 @@ pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./ERC1155BaseContract.sol";
 // General Error Validations
 error TokenDoesNotExist();
@@ -23,9 +24,13 @@ error CanNotBurnThisToken();
 
 // todo add cool down
 contract GameContract is Ownable {
+    using Strings for uint256;
     ERC1155BaseContract internal baseContract;
 
-    uint256 private immutable secondsForAMinute = 60;
+    string private ipfsFolder =
+        "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/";
+
+    uint256 private immutable secondsForAMinute = 1 minutes;
 
     mapping(uint256 => bool) private tokenValidationMap;
     mapping(uint256 => uint256[]) private tokenForgeEligibilityMap;
@@ -56,8 +61,6 @@ contract GameContract is Ownable {
         isAmountZero(amount);
         // implement the token dependency logic
         isEligibleToMintTokenId(tokenId, amount);
-        // restrict null address and contract Addresses
-        authorizeAddress(msg.sender);
         // get minting price for the selectedToken
         uint256 mintingPrice = getMiningPriceForToken(tokenId);
         if (msg.value < mintingPrice) {
@@ -73,8 +76,6 @@ contract GameContract is Ownable {
         isAmountZero(amount);
         // check availabilities
         isEligibleToBurn(tokenId, amount);
-        // restrict null address and contract Addresses
-        authorizeAddress(msg.sender);
         // burn tokens
         baseContract.burnToken(msg.sender, tokenId, amount);
         emit MintBurnTradeNotifier(msg.sender);
@@ -95,9 +96,6 @@ contract GameContract is Ownable {
         // check availabilities
         isEligibleToTransfer(fromTokenId, amount, true);
         isEligibleToTransfer(toTokenId, amount, false);
-
-        // restrict null address and contract Addresses
-        authorizeAddress(msg.sender);
         // burn tokens
         baseContract.burnToken(msg.sender, fromTokenId, amount);
         baseContract.mintToken(msg.sender, toTokenId, amount);
@@ -115,34 +113,12 @@ contract GameContract is Ownable {
     //--------------------------------------------------Setup Funtions  ---------------------------------------------
 
     function setInitialTokenURI() external onlyOwner {
-        baseContract.setNewToken(
-            0,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/0"
-        );
-        baseContract.setNewToken(
-            1,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/1"
-        );
-        baseContract.setNewToken(
-            2,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/2"
-        );
-        baseContract.setNewToken(
-            3,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/3"
-        );
-        baseContract.setNewToken(
-            4,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/4"
-        );
-        baseContract.setNewToken(
-            5,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/5"
-        );
-        baseContract.setNewToken(
-            6,
-            "ipfs://bafybeielsn64kfenijpqvmt5wx5vwmuhbsdbynquvjy2wswsxigpgtj2jq/6"
-        );
+        for (uint256 i = 0; i < 7; i++) {
+            baseContract.setNewToken(
+                i,
+                string(abi.encodePacked(ipfsFolder, i.toString()))
+            );
+        }
         setEligibilityForMint();
         setEligibleTokenIds();
         setInitialFees();
@@ -198,12 +174,6 @@ contract GameContract is Ownable {
         returns (uint256 price)
     {
         price = tokenFees[tokenId];
-    }
-
-    function authorizeAddress(address sender) private view {
-        if (sender == address(0) || sender.code.length > 0) {
-            revert InvalidWalletAddress();
-        }
     }
 
     function checkIfTokenIsValid(uint256 tokenId) private view {
@@ -280,7 +250,7 @@ contract GameContract is Ownable {
                 "Missing a Token Two"
             );
             isEligible = true;
-        } else if (tokenId == 6) {
+        } else {
             require(
                 baseContract.balanceOf(msg.sender, 0) > amount - 1,
                 "Missing a Token Zero"
@@ -305,17 +275,11 @@ contract GameContract is Ownable {
         isEligible = false;
         if (tokenId == 0) {
             revert CanNotBurnThisToken();
-        }
-        if (tokenId == 1) {
+        } else if (tokenId == 1) {
             revert CanNotBurnThisToken();
-        }
-        if (tokenId == 2) {
+        } else if (tokenId == 2) {
             revert CanNotBurnThisToken();
-        }
-        if (
-            (tokenId == 3 || tokenId == 4 || tokenId == 5 || tokenId == 6) &&
-            amount > 0
-        ) {
+        } else {
             if (baseContract.balanceOf(msg.sender, tokenId) < amount) {
                 revert InsufficientTokens();
             }
@@ -359,9 +323,7 @@ contract GameContract is Ownable {
                 revert InsufficientTokensToTransfer();
             }
             isEligible = true;
-        } else if (
-            (tokenId == 0 || tokenId == 1 || tokenId == 2) && !isFromToken
-        ) {
+        } else {
             isEligible = true;
         }
     }

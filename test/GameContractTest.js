@@ -35,6 +35,14 @@ describe('GameContractMint startMintingToken function tests', () => {
 		expect(await gameContract.balanceOf(accounts[user2].address, 0)).to.be.equal(100);
 	});
 
+	it('Mint Token Zero with no payment 0 amount', async () => {
+		await expect(gameContract.connect(accounts[user2]).startMintingToken(0 , 0)).to.be.revertedWithCustomError(gameContract,'TokenAmountCanNotBeZero');
+	});
+
+	it('Mint Token 9 with no payment 100 amount', async () => {
+		await expect(gameContract.connect(accounts[user2]).startMintingToken(9 , 100)).to.be.revertedWithCustomError(gameContract,'TokenDoesNotExist');
+	});
+
 
 
 	it('Forge Token Three Full balances Forge', async () => {
@@ -73,6 +81,30 @@ describe('GameContractMint startMintingToken function tests', () => {
 		expect(await gameContract.balanceOf(accounts[user2].address, 3)).to.be.equal(50);
 		expect(await gameContract.balanceOf(accounts[user2].address, 0)).to.be.equal(50);
 		expect(await gameContract.balanceOf(accounts[user2].address, 1)).to.be.equal(50);
+	});
+	it('Forge Token six partial balances forge', async () => {
+		await gameContract.connect(accounts[user2]).startMintingToken(0 , 100);
+		expect(await gameContract.balanceOf(accounts[user2].address, 0)).to.be.equal(100);
+
+		await provider.send('evm_increaseTime', [60 +1]);
+
+		await gameContract.connect(accounts[user2]).startMintingToken(1 , 100);
+		expect(await gameContract.balanceOf(accounts[user2].address, 1)).to.be.equal(100);
+
+		await provider.send('evm_increaseTime', [60 +1]);
+
+		await gameContract.connect(accounts[user2]).startMintingToken(2 , 100);
+		expect(await gameContract.balanceOf(accounts[user2].address, 2)).to.be.equal(100);
+
+		await provider.send('evm_increaseTime', [60 +1]);
+
+		const payment = hre.ethers.utils.parseEther('1');
+
+		await gameContract.connect(accounts[user2]).startMintingToken(6 , 50, {value: payment});
+		expect(await gameContract.balanceOf(accounts[user2].address, 6)).to.be.equal(50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 0)).to.be.equal(50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 1)).to.be.equal(50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 2)).to.be.equal(50);
 	});
 
 	it('Forge Token Three with No Price reverting with InSufficientMatic', async () => {
@@ -137,7 +169,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 	});
 
 
-	it.only('Forge Token Three with No Price No Token 1 Minting Token 4', async () => {
+	it('Forge Token Three with No Price No Token 1 Minting Token 4', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(1 , 100);
 
 		await provider.send('evm_increaseTime', [60 +1]);
@@ -145,7 +177,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 		await expect( gameContract.connect(accounts[user2]).startMintingToken(4 , 1000)).to.be.revertedWith( 'Missing a Token One');
 
 	});
-	it.only('Forge Token Three with No Price Not enough Token 2 Minting Token 4', async () => {
+	it('Forge Token Three with No Price Not enough Token 2 Minting Token 4', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(1 , 1000);
 		await provider.send('evm_increaseTime', [60 +1]);
 
@@ -156,7 +188,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 
 	});
 
-	it.only('Forge Token Three with No Price No Token 0 Minting Token 5', async () => {
+	it('Forge Token Three with No Price No Token 0 Minting Token 5', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(0 , 100);
 
 		await provider.send('evm_increaseTime', [60 +1]);
@@ -164,7 +196,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 		await expect( gameContract.connect(accounts[user2]).startMintingToken(5 , 1000)).to.be.revertedWith( 'Missing a Token Zero');
 
 	});
-	it.only('Forge Token Three with No Price Not enough Token 2 Minting Token 5', async () => {
+	it('Forge Token Three with No Price Not enough Token 2 Minting Token 5', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(0 , 1000);
 		await provider.send('evm_increaseTime', [60 +1]);
 
@@ -174,7 +206,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 		await expect( gameContract.connect(accounts[user2]).startMintingToken(5 , 1000)).to.be.revertedWith( 'Missing a Token Two');
 
 	});
-	it.only('Forge Token Three with No Price No Token 0 Minting Token 6', async () => {
+	it('Forge Token Three with No Price No Token 0 Minting Token 6', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(0 , 100);
 
 		await provider.send('evm_increaseTime', [60 +1]);
@@ -182,7 +214,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 		await expect( gameContract.connect(accounts[user2]).startMintingToken(6 , 1000)).to.be.revertedWith( 'Missing a Token Zero');
 
 	});
-	it.only('Forge Token Three with No Price Not enough Token 1 Minting Token 6', async () => {
+	it('Forge Token Three with No Price Not enough Token 1 Minting Token 6', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(0 , 1000);
 		await provider.send('evm_increaseTime', [60 +1]);
 
@@ -192,7 +224,7 @@ describe('GameContractMint startMintingToken function tests', () => {
 		await expect( gameContract.connect(accounts[user2]).startMintingToken(6 , 1000)).to.be.revertedWith( 'Missing a Token One');
 
 	});
-	it.only('Forge Token Three with No Price Not enough Token 2 Minting Token 6', async () => {
+	it('Forge Token Three with No Price Not enough Token 2 Minting Token 6', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(0 , 1000);
 		await provider.send('evm_increaseTime', [60 +1]);
 
@@ -205,7 +237,22 @@ describe('GameContractMint startMintingToken function tests', () => {
 		await expect( gameContract.connect(accounts[user2]).startMintingToken(6 , 1000)).to.be.revertedWith( 'Missing a Token Two');
 
 	});
-	it.only('Forge 6 and check on a different user', async () => {
+	it('Forge 6 and check on a different user', async () => {
+		await gameContract.connect(accounts[user2]).startMintingToken(0 , 1000);
+		await provider.send('evm_increaseTime', [60 +1]);
+
+		await gameContract.connect(accounts[user2]).startMintingToken(1 , 1000);
+		await provider.send('evm_increaseTime', [60 +1]);
+
+		await gameContract.connect(accounts[user2]).startMintingToken(2 , 900);
+		await provider.send('evm_increaseTime', [60 +1]);
+
+		await expect( gameContract.connect(accounts[user2]).startMintingToken(6 , 1000)).to.be.revertedWith( 'Missing a Token Two');
+		expect(await gameContract.balanceOf(accounts[user3].address, 6)).to.be.equal(0);
+
+	});
+
+	it('try Forge 6 with insufficient token', async () => {
 		await gameContract.connect(accounts[user2]).startMintingToken(0 , 1000);
 		await provider.send('evm_increaseTime', [60 +1]);
 
@@ -295,6 +342,10 @@ describe('GameContractMint startBurningToken function tests', () => {
 		await gameContract.connect(accounts[user2]).startBurningToken(6 , 50);
 		expect(await gameContract.balanceOf(accounts[user2].address, 6)).to.be.equal(50);
 	});
+	it('Forge Burning Token Six 1000 for revert', async () => {
+		await gameContract.connect(accounts[user2]).startBurningToken(6 , 50);
+		await expect( gameContract.connect(accounts[user2]).startBurningToken(6 , 1000)).to.be.revertedWithCustomError(gameContract,'InsufficientTokens');
+	});
 
 });
 
@@ -364,6 +415,31 @@ describe('GameContractMint startTransferringToken function tests', () => {
 		await gameContract.connect(accounts[user2]).startTransferringToken(6 , 0, 50);
 		expect(await gameContract.balanceOf(accounts[user2].address, 6)).to.be.equal(50);
 		expect(await gameContract.balanceOf(accounts[user2].address, 0)).to.be.equal(tokenZeroBalance.add(new BigNumber.from('50')));
+	});
+	it('Successful transfer from 5 to 0', async () => {
+		const tokenZeroBalance =await gameContract.balanceOf(accounts[user2].address, 0);
+		await gameContract.connect(accounts[user2]).startTransferringToken(5 , 0, 50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 5)).to.be.equal(50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 0)).to.be.equal(tokenZeroBalance.add(new BigNumber.from('50')));
+	});
+	it('Successful transfer from 4 to 1', async () => {
+		const tokenZeroBalance =await gameContract.balanceOf(accounts[user2].address, 1);
+		await gameContract.connect(accounts[user2]).startTransferringToken(4 , 1, 50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 4)).to.be.equal(50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 1)).to.be.equal(tokenZeroBalance.add(new BigNumber.from('50')));
+	});
+	it('Successful transfer from 3 to 2', async () => {
+		const tokenZeroBalance =await gameContract.balanceOf(accounts[user2].address, 2);
+		await gameContract.connect(accounts[user2]).startTransferringToken(3 , 2, 50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 3)).to.be.equal(50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 2)).to.be.equal(tokenZeroBalance.add(new BigNumber.from('50')));
+	});
+	it('Successful transfer from 2 to 1', async () => {
+		const tokenZeroBalance =await gameContract.balanceOf(accounts[user2].address, 1);
+		const tokenTwoBalance =await gameContract.balanceOf(accounts[user2].address, 2);
+		await gameContract.connect(accounts[user2]).startTransferringToken(2 , 1, 50);
+		expect(await gameContract.balanceOf(accounts[user2].address, 2)).to.be.equal(tokenTwoBalance.sub(new BigNumber.from('50')));
+		expect(await gameContract.balanceOf(accounts[user2].address, 1)).to.be.equal(tokenZeroBalance.add(new BigNumber.from('50')));
 	});
 
 

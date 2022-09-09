@@ -9,7 +9,8 @@
     "lint": "prettier --list-different contracts/**/*.sol",
     "eslint": "npx eslint ./test/*.js",
     "solhint-s": "npx solhint ./contracts/**/*.sol",
-    "solhint-f": "npx solhint ./contracts/**/*.sol --fix"
+    "solhint-f": "npx solhint ./contracts/**/*.sol --fix",
+    "test1": "nyc --reporter=text mocha"
   },
   "repository": {
     "type": "git",
@@ -34,15 +35,16 @@
     "@typechain/hardhat": "6.1.2",
     "chai": "4.3.6",
     "dotenv": "16.0.1",
+    "eslint": "8.23.0",
     "ethers": "5.6.9",
     "hardhat": "2.10.2",
     "hardhat-gas-reporter": "1.0.8",
+    "nyc": "^15.1.0",
     "prettier": "2.7.1",
-    "solidity-coverage": "0.7.21",
-    "typechain": "8.1.0",
-    "eslint": "8.23.0",
     "solhint": "3.3.7",
-    "solhint-plugin-prettier": "0.0.5"
+    "solhint-plugin-prettier": "0.0.5",
+    "solidity-coverage": "0.7.21",
+    "typechain": "8.1.0"
   },
   "dependencies": {
     "@nomiclabs/hardhat-waffle": "^2.0.3",
