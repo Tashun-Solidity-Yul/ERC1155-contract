@@ -1,13 +1,13 @@
 {
     "env": {
-        "browser": true,
-        "es2021": true
+        "browser": false,
+        "es2021": false
     },
     "extends": "eslint:recommended",
     "overrides": [
     ],
     "parserOptions": {
-        "ecmaVersion": "2021",
+        "ecmaVersion": 2015,
         "sourceType": "module"
     },
     "rules": {
